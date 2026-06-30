@@ -1480,7 +1480,7 @@ updateNav();
 <script type="module">
 import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
 mermaid.initialize({
-  startOnLoad: true,
+  startOnLoad: false,
   theme: 'base',
   themeVariables: {
     primaryColor: '#F0E6C8',
@@ -1513,6 +1513,29 @@ mermaid.initialize({
   },
   securityLevel: 'loose'
 });
+
+/* Render every diagram manually via the render() API rather than relying on
+   automatic startOnLoad scanning — startOnLoad silently fails (or sizes at 0)
+   for .mermaid nodes that sit inside a display:none ancestor at scan time,
+   which is exactly the case for the two inactive Edge Case tab panels.
+   Calling mermaid.render() directly is independent of visibility, so every
+   diagram — visible or currently hidden behind a tab — renders correctly. */
+async function renderAllDiagrams(){
+  const nodes = document.querySelectorAll('.mermaid');
+  let i = 0;
+  for (const node of nodes){
+    const source = node.textContent.trim();
+    if(!source) continue;
+    try {
+      const { svg } = await mermaid.render('mermaidSvg' + (i++), source);
+      node.innerHTML = svg;
+    } catch (err){
+      node.innerHTML = '<p style="padding:24px;color:#A8543E;font-size:13px;line-height:1.6">This diagram could not render. Please refresh the page.</p>';
+      console.error('Mermaid render error:', err);
+    }
+  }
+}
+renderAllDiagrams();
 </script>
 </body>
 </html>
