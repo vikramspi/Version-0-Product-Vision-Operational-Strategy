@@ -1524,12 +1524,7 @@ async function renderAllDiagrams(){
   const nodes = document.querySelectorAll('.mermaid');
   let i = 0;
   for (const node of nodes){
-    // Normalize <br> tags to literal newlines and decode HTML entities
-    // before passing text to Mermaid.
-    let source = node.innerHTML.replace(/<br\s*\/?>(\s*)/gi, '\n');
-    const tmp = document.createElement('div');
-    tmp.innerHTML = source;
-    source = tmp.textContent.replace(/\u00A0/g, ' ').trim();
+    const source = node.textContent.trim();
     if(!source) continue;
     try {
       const { svg } = await mermaid.render('mermaidSvg' + (i++), source);
