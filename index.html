@@ -1524,14 +1524,12 @@ async function renderAllDiagrams(){
   const nodes = document.querySelectorAll('.mermaid');
   let i = 0;
   for (const node of nodes){
-    // Read raw HTML so we can convert any <br> tags (which the browser
-    // may parse into elements) into literal newlines for Mermaid.
-    // Using innerHTML preserves any <br> markers; replace them with '\n'
-    // so multiline labels remain valid Mermaid source when parsed.
-    let source = node.innerHTML.trim();
-    source = source.replace(/<br\s*\/?>(\s*)/gi, '\n');
-    source = source.replace(/&nbsp;/g, ' ');
-    source = source.trim();
+    // Normalize <br> tags to literal newlines and decode HTML entities
+    // before passing text to Mermaid.
+    let source = node.innerHTML.replace(/<br\s*\/?>(\s*)/gi, '\n');
+    const tmp = document.createElement('div');
+    tmp.innerHTML = source;
+    source = tmp.textContent.replace(/\u00A0/g, ' ').trim();
     if(!source) continue;
     try {
       const { svg } = await mermaid.render('mermaidSvg' + (i++), source);
